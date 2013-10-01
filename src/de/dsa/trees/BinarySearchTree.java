@@ -4,7 +4,6 @@
  */
 package de.dsa.trees;
 
-
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Stack;
@@ -68,15 +67,151 @@ public class BinarySearchTree<K extends Comparable<K>> {
 
         return true;
     }
-    
-    public boolean remove(K k){
+    /**
+     * Löscht Knoten des Baumes , falls vorhanden.
+     * 
+     * 
+     * @param k Schlüssel des zu löschenden Knotens
+     * @return wenn erfolgreich true, sonst false. 
+     */
+    public boolean remove(K k) {
+        Node<K> parent = head;
+        Node<K> n = head.getRight();
+
+        /*
+         *  Sucht Knoten mit zu löschendem Schlüssel.
+         *  Schleife erfasst auch Elternknoten des Knotens.
+         */
+        while (n != nullNode) {
+            int compare = k.compareTo(n.getKey());
+
+            
+
+            if (compare == 0) {
+                break;
+            }
+
+            parent = n;
+            n = (compare > 0 ? n.getRight() : n.getLeft());
+
+        }
+        
+        /*
+         * Falls Knoten mit gesuchtem Schlüssel nicht exisitet
+         * gebe false zurück.
+         */
+        if (n == nullNode) {
+            return false;
+        }
+        
+        System.out.println("Anzahl Kinder " + getChildCount(n) );
+        
+        /*
+         * Abhängig von der Kindanzahl wird die entsprechende Aktion
+         * bzw. Methode ausgeführt.
+         */
+        switch (getChildCount(n)) {
+            case 0:
+                if(parent.getLeft() == n)
+                    parent.setLeft(nullNode);
+                else
+                    parent.setRight(nullNode);
+                break;
+            case 1:                
+                this.replace_with_child(parent, n);
+                break;
+            case 2:
+                this.replace_with_Inorderpredecessor(parent, n);
+                break;
+            default:
+                break;
+        }
+
         return true;
     }
     
+    /**
+     * Für den Fall das nur ein Kindknoten existiert.
+     * 
+     * @param parent Elternknoten des zu löschenden Knotens.
+     * @param n zu löschender Knoten
+     */
+    private void replace_with_child(Node<K> parent, Node<K> n) {
+        Node<K> child;
+        if (n.getLeft() != nullNode) 
+            child = n.getLeft();
+        else 
+            child = n.getRight();
+        
+        
+        
+        if(parent.getLeft() == n)
+            parent.setLeft(child);
+        else
+            parent.setRight(child);
+
+    }
+    /**
+     * 
+     * @param n 
+     */
+    private void replace_with_Inorderpredecessor(Node<K> parent,Node<K> n) {
+        Node<K> child = n.getLeft();
+        Node<K> temp_parent = n;
     
+        while(child.getRight() != nullNode){
+            temp_parent = child;
+            child = child.getRight();
+        }
+        
+        if(temp_parent != n){
+            temp_parent.setRight(nullNode);
+        }else{
+            temp_parent.setLeft(nullNode);
+        }
+        
+        if(parent.getLeft() == n)
+            parent.setLeft(child);
+        else 
+            parent.setRight(child);
+            
+        child.setLeft(n.getLeft());
+        child.setRight(n.getRight() );
+    
+    }
+
+    private byte getChildCount(Node<K> n) {
+        Node<K> left = n.getLeft();
+        Node<K> right = n.getRight();
+
+        if (left == nullNode && right == nullNode) {
+            return 0;
+        } else if (left != nullNode && right != nullNode) {
+            return 2;
+        } else {
+            return 1;
+        }
+    }
+
+    public Node findNode(K k) {
+        Node<K> n = head.getRight();
+
+        while (n != nullNode) {
+            int compare = k.compareTo(n.getKey());
+
+            if (compare == 0) {
+                return n;
+            }
+
+            n = (compare > 0 ? n.getRight() : n.getLeft());
+
+        }
+
+        return null;
+    }
 
     public void print(byte mode) {
-        Node n = head.getRight();
+        Node<K> n = head.getRight();
 
         if (n == nullNode) {
             System.err.println("Tree is empty.");
@@ -150,99 +285,53 @@ public class BinarySearchTree<K extends Comparable<K>> {
             }
         }
     }
-    
-    public void printTree(){
+
+    public void printTree() {
         Node root = head.getRight();
-        if(root == nullNode)
+        if (root == nullNode) {
             return;
-        
+        }
+
         Stack<Node> globalStack = new Stack();
         int emptyLeaf = 32;
         boolean isRowEmpty = false;
         globalStack.push(root);
-        
-        while(!isRowEmpty){
+
+        while (!isRowEmpty) {
             Stack<Node> localStack = new Stack();
             isRowEmpty = true;
-            
-            for(int i = 0 ; i < emptyLeaf ; i++){
+
+            for (int i = 0; i < emptyLeaf; i++) {
                 System.out.print(" ");
             }
-            
-            while(!globalStack.isEmpty()){
+
+            while (!globalStack.isEmpty()) {
                 Node temp = globalStack.pop();
-                
-                if(temp != nullNode){
+
+                if (temp != nullNode) {
                     System.out.print(temp.getKey());
                     localStack.push(temp.getLeft());
                     localStack.push(temp.getRight());
-                    
-                    if(temp.getLeft() != nullNode || temp.getRight() != nullNode)
+
+                    if (temp.getLeft() != nullNode || temp.getRight() != nullNode) {
                         isRowEmpty = false;
-                }else{
+                    }
+                } else {
                     System.out.print("  ");
-                    localStack.push(null);
-                    localStack.push(null);
+                    localStack.push(nullNode);
+                    localStack.push(nullNode);
                 }
-                for(int i = 0; i < emptyLeaf * 2 - 2 ; i++){
+                for (int i = 0; i < emptyLeaf * 2 - 2; i++) {
                     System.out.print(" ");
                 }
             }
             System.out.println();
-            emptyLeaf /=2;
-            while(!localStack.isEmpty())
+            emptyLeaf /= 2;
+            while (!localStack.isEmpty()) {
                 globalStack.push(localStack.pop());
-        }
-        
-        
-    }
-    
-  
-
-    private class Node<K> {
-
-        private Node<K> left;
-        private Node<K> right;
-        private K key;
-
-        public Node(K key, Node left, Node right) {
-            this.key = key;
-            this.left = left;
-            this.right = right;
+            }
         }
 
-        public Node() {
-            this.left = null;
-            this.right = null;
-            this.key = null;
-        }
 
-        public Node getLeft() {
-            return left;
-        }
-
-        public void setLeft(Node left) {
-            this.left = left;
-        }
-
-        public Node getRight() {
-            return right;
-        }
-
-        public void setRight(Node right) {
-            this.right = right;
-        }
-
-        public K getKey() {
-            return key;
-        }
-
-        public void setKey(K key) {
-            this.key = key;
-        }
-
-        private boolean isLeaf() {
-            return right == nullNode && left == nullNode;
-        }
     }
 }

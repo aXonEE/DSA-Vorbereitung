@@ -137,12 +137,30 @@ public class Main {
         
         
        
-        for(int i = 0 ; i < 1000000 ; i++){
-            
-            tree.insert((int)(10000 * Math.random()));
-        }
+        tree.insert(10);
+        tree.insert(5);
+        tree.insert(2);
+        tree.insert(8);
+        tree.insert(6);
+        tree.insert(4);
+        tree.insert(1);
+        tree.insert(20);
+        tree.insert(15);
+        tree.insert(11);
+        tree.insert(18);
+        
        
        
         tree.print(BinarySearchTree.LEVELORDER);
+        
+        tree.printTree();
+        
+        tree.remove(2);
+        
+        System.out.println("");
+        
+        tree.print(BinarySearchTree.LEVELORDER);
+        
+        tree.printTree();
     }
 }
